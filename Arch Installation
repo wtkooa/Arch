@@ -1,0 +1,173 @@
+INSTALLATION
+
+
+#Verify UEFI Boot mode
+ls /sys/firmware/efi #files should be here
+
+
+#Connect to Internet
+iw dev #Get name of {wifidevice}
+wifi-menu
+dhcpcd {wifidevice}
+ping -c 4 google.com #Check connection
+
+
+#Update System Clock
+timedatectl set-ntp true
+timedatectl status #Check System Clock Sync True
+
+
+#Partition Disks
+lsblk #List blk drives to get {drive}
+gdisk {drive}
+o #wipe all partitions
+
+n #New Partition
+1 #Default
+#Default First Sector
++512Mib #Last Sector
+ef00 #EFI System Code
+
+n #New Partition
+2 #Default
+#Default First Sector
+#Default Last Sector
+8e00 #Linux LVM Code
+
+w #Write Partitions
+
+
+#Format EFI Partition
+lsblk #To get {bootdrive}
+mkfs.fat -F32 {bootdrive}
+
+
+#Encyrpt LVM Drive
+lsblk #To get {cryptdrive}
+cryptsetup luksFormat {cryptdrive}
+cryptsetup open --type luks {cryptdrive} lvm
+
+
+#Partition LVM
+pvcreate /dev/mapper/lvm
+vgcreate volgrp0 /dev/mapper/lvm
+lvcreate -L2G volgrp0 -n swap
+lvcreate -L30G volgrp0 -n root
+lvcreate -l 100%FREE volgrp0 -n home
+
+
+#Format LVM Partitions
+mkfs.ext4 /dev/mapper/volgrp0-root
+mkfs.ext4 /dev/mapper/volgrp0-home
+mkswap /dev/mapper/volgrp0-swap
+
+
+#Mount the Drives
+mount /dev/mapper/volgrp0-root /mnt
+mkdir /mnt/home
+mkdir /mnt/boot
+mount /dev/mapper/volgrp0-home /mnt/home
+mount {bootdrive} /mnt/boot
+
+
+#Enable swap
+swapon /dev/mapper/volgrp0-swap
+
+
+#Install Arch Base Packages
+pacstrap /mnt base vim #Edit Mirrorlist
+
+
+#Generate Filesystem Table
+genfstab -U -p /mnt >> /mnt/etc/fstab
+
+
+#Change Root into New System
+arch-chroot /mnt
+
+
+#Set Time Zone
+ln -sf /usr/share/zoneinfo/America/Chicago /etc/localtime
+hwclock --systohc --utc
+
+
+#Configture Locale
+vim /etc/locale.gen #Uncomment en_US.UTF-8 UTF-8
+locale-gen
+locale > /etc/locale.conf
+
+
+#Create Hostname
+echo {hostname} > /etc/hostname
+
+
+#Create Root Password
+passwd
+
+
+#Install Common Packages
+pacman -S linux-headers linux-lts linux-lts-headers grub efibootmgr intel-ucode wpa_supplicant wireless_tools iw dialog
+
+
+#Update CPIO Hooks for Encryption
+vim /etc/mkinitcpio.conf #HOOKS: Move keyboard before blocks, add encrypt lvm2
+mkinitcpio -p linux
+mkinitcpio -p linux-lts
+
+
+#Grub Install
+vim /etc/default/grub #To GRUB_CMDLINE_LINUX_DEFAULT ADD: cryptdevice=/dev/{cryptdrive}:volgrp0
+grub-install --target=x86_64-efi --efi-directory=/boot --bootloader-id=grub
+grub-mkconfig -o /boot/grub/grub.cfg
+
+
+#Restart
+exit
+umount -R /mnt
+reboot
+
+
+POST INSTALLATION
+
+
+#Connect to Internet
+wifi-menu
+dhcpcd {wifidevice}
+ping -c 4 google.com #Check connection
+
+
+#Set Locale
+localectl set-locale LANG="en_US.UTF-8"
+
+
+#Add User
+useradd -m -s /bin/bash {username}
+passwd {username}
+pacman -S sudo
+visudo # add "{username} ALL=(ALL) ALL" under "root ALL=(ALL) ALL"
+reboot
+
+
+#Install Network Managment Tools
+pacman -Sy networkmanager network-manager-applet wpa_actiond
+systemctl enable NetworkManager.service
+
+
+#Install the X Server Tools
+pacman -Sy xf86-input-libinput xorg-server xorg-xinit xorg-apps mesa
+
+
+#Install Intel Video Driver
+pacman -Sy xf86-video-intel
+
+
+#Install LightDm Display Manager
+pacman -Sy lightdm lightdm-gtk-greeter
+systemctl enable lightdm.service
+
+
+#Install MATE Desktop Environment
+pacman -Sy mate mate-extra
+
+
+reboot

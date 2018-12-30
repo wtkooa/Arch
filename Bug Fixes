@@ -1,0 +1,8 @@
+#MATE Terminal Font Weirdness
+Change font to "Noto Monospace Regular"
+
+#External Storage Device Says "Error while copying to {drive}. The destination is read-only."
+#First Try
+sudo chmod 755 -R {mountpoint}
+#Second Try
+sudo vim /etc/fusc.conf #Uncomment "#user_allow_other" -> Save -> Re-Login

@@ -1,0 +1,26 @@
+#New Wireless Network Connection:
+-right click on network icon
+-Edit Connections
+
+
+#Change System Language
+localectl set-locale LANG=en_US.UTF-8
+localectl set-locale LANG=ja_JP.UTF-8
+
+/etc/locale.conf
+LANG=en_US.UTF-8
+
+#Set Timezone
+timedatectl set-timezone Asia/Tokyo
+
+#Rip audio from video.
+for i in *.avi; do ffmpeg -i "$i" "${i%.*}.mp3"; done
+
+#Text to speech or file
+espeak -s 120 -v mb-us1 "Hello World"
+
+# 字幕なし by default
+ツール 設定　字幕　字幕の言語 優先する字幕の言語:　none
+
+# 日本語のオーディオ　by default
+ツール　設定　オーディオ　優先するオーディオ言語:　jpn

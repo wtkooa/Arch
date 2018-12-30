@@ -1,0 +1,38 @@
+#VLC
+pacman -Sy vlc qt4
+
+
+#Kdenlive
+pacman -Sy kdenlive frei0r-plugins
+
+
+#Morrowind
+pacman -S openmw
+AUR: steamcmd
+tar -xvf steamcmd.tar.gx
+makepkg -sic
+sudo steamcmd
+login [username] [password]
+@sSteamCmdForcePlatformType windows
+force_install_dir [directory]
+app_update 22320 validate
+
+
+#Japanese Language Support
+sudo pacman -S adobe-source-han-sans-jp-fonts otf-ipafont
+AUR: ttf-monapo
+sudo pacman -S ibus ibus-anthy
+#In ~/.xprofile add
+"""
+# Settings for Japanese input
+export GTK_IM_MODULE='ibus'
+export QT_IM_MODULE='ibus'
+export XMODIFIERS=@im='ibus'
+
+#Toolbar for anthy
+ibus-daemon -drx
+"""
+restart
+R-Click iBus Icon -> Prefs -> Input Method -> Add -> Japanese -> Anthy
+
+
