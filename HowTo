@@ -24,3 +24,12 @@ espeak -s 120 -v mb-us1 "Hello World"
 
 # 日本語のオーディオ　by default
 ツール　設定　オーディオ　優先するオーディオ言語:　jpn
+
+Arduino UNO R3
+sudo pacman arduino arduino-docs arduino-avr-core
+gpasswd -a {username} uucp
+gpasswd -a {username} lock
+Open Arduino IDE
+Tools -> Select board type
+Tools -> Select Serial Port
+
