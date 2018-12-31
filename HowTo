@@ -2,7 +2,6 @@
 -right click on network icon
 -Edit Connections
 
-
 #Change System Language
 localectl set-locale LANG=en_US.UTF-8
 localectl set-locale LANG=ja_JP.UTF-8
@@ -26,7 +25,7 @@ espeak -s 120 -v mb-us1 "Hello World"
 ツール　設定　オーディオ　優先するオーディオ言語:　jpn
 
 Arduino UNO R3
-sudo pacman arduino arduino-docs arduino-avr-core
+sudo pacman -S arduino arduino-docs arduino-avr-core
 gpasswd -a {username} uucp
 gpasswd -a {username} lock
 Open Arduino IDE
